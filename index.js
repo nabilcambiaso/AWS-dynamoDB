@@ -1,7 +1,8 @@
 const express = require('express');
 const { dynamoDBInsert } = require('./services/dynamoDBInsert');
 const { dynamoDBGet } = require('./services/dynamoDBGet');
-
+const { queryTable } = require('./services/dynamoDbGetFiltered');
+const createDynamoDBTable = require('./services/createDynamoDBTable');
 const app = express();
 const port = 3003;
 
@@ -41,8 +42,31 @@ app.get('/dynamoDBGet', (req, res) => {
     })
     .catch(error => {
       console.error("Error:", error);
-      res.status(200).send(error);
+      res.status(500).send(error);
     });
+});
+
+app.get('/dynamoDBGetFiltered', (req, res) => {
+
+  const tableName = "issues";
+  const attributes = {
+    name: "Amina alam",
+    age: 2
+  };
+
+  queryTable(tableName, attributes)
+    .then(data => {
+      console.log("Items retrieved successfully:", data.Items);
+      res.status(200).send(data);
+    })
+    .catch(error => {
+      console.error("Error retrieving items:", error);
+      res.status(500).send(error);
+    });
+});
+
+app.get('/createTable', (req, res) => {
+  createDynamoDBTable();
 });
 
 app.listen(port, () => {
